@@ -13,7 +13,7 @@ from PIL import Image
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from src import CNN_config as config
-from src.models import ChangiAeroVisionModel
+from src.models import CNN_ChangiAeroVisionModel
 from src.data import get_val_transform
 
 
@@ -61,7 +61,7 @@ def main(args):
     
     # Load model
     print("\nLoading model...")
-    model = ChangiAeroVisionModel(num_classes=config.NUM_CLASSES, pretrained=False)
+    model = CNN_ChangiAeroVisionModel(num_classes=config.NUM_CLASSES, pretrained=False)
     model = model.to(device)
     
     model_path = args.model_path or f'{config.MODELS_DIR}/best_model_phase2.pth'

@@ -11,10 +11,13 @@ SEED = 42
 # Device configuration
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-# Dataset paths - Google Colab structure
-# Note: FGVC dataset will be reorganized into this structure
-FGVC_ROOT = '/content/drive/MyDrive/Colab Notebooks/aircraft_dataset/fgvc-aircraft-2013b/data'
-DATA_ROOT = '/content/drive/MyDrive/Colab Notebooks/aircraft_dataset'  # Organized dataset output
+# Dataset paths - Local Windows structure
+# ============================================
+# Update DATA_ROOT to point to your local dataset folder
+# Your dataset should contain train/, val/, test/ subfolders with class folders inside
+# Example: r'C:\Users\PC\Downloads\aircraft_dataset'
+# ============================================
+DATA_ROOT = r'C:\Users\PC\Downloads\aircraft_dataset'  # ← CHANGE THIS to your local path
 TRAIN_DIR = os.path.join(DATA_ROOT, 'train')
 VAL_DIR = os.path.join(DATA_ROOT, 'val')
 TEST_DIR = os.path.join(DATA_ROOT, 'test')
@@ -113,12 +116,10 @@ def print_config():
     print("="*60)
     print("CHANGI AEROVISION (CNN) - CONFIGURATION")
     print("="*60)
-    print(f"FGVC source: {FGVC_ROOT}")
-    print(f"Organized dataset: {DATA_ROOT}")
+    print(f"Dataset location: {DATA_ROOT}")
     print(f"Target aircraft classes: {len(AIRCRAFT_CLASSES)}")
-    print(f"Available in FGVC dataset: {NUM_CLASSES} classes")
-    print(f"Missing from FGVC: B787, E190")
-    print(f"Classes: {', '.join(AIRCRAFT_CLASSES)}")
+    print(f"Available in dataset: {NUM_CLASSES} classes")
+    print(f"Classes: {', '.join(AIRCRAFT_CLASSES[:NUM_CLASSES])}")
     print(f"Batch size: {BATCH_SIZE}")
     print(f"Image size: {IMG_SIZE}x{IMG_SIZE}")
     print(f"Phase 1 epochs: {EPOCHS_PHASE1} (frozen backbone)")

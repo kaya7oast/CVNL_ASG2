@@ -8,7 +8,7 @@ import torch.nn as nn
 from torchvision import models
 
 
-class ChangiAeroVisionModel(nn.Module):
+class CNN_ChangiAeroVisionModel(nn.Module):
     """
     ResNet50-based aircraft classifier for Changi Airport operations
 
@@ -26,7 +26,7 @@ class ChangiAeroVisionModel(nn.Module):
             num_classes: Number of aircraft classes to classify
             pretrained: Whether to use pretrained ImageNet weights
         """
-        super(ChangiAeroVisionModel, self).__init__()
+        super(CNN_ChangiAeroVisionModel, self).__init__()
 
         # Load pretrained ResNet50 backbone
         self.backbone = models.resnet50(pretrained=pretrained)
@@ -95,7 +95,7 @@ class ChangiAeroVisionModel(nn.Module):
         print("="*60)
 
 
-def create_model(num_classes, pretrained=True, device='cuda'):
+def CNN_create_model(num_classes, pretrained=True, device='cuda'):
     """
     Factory function to create and initialize model
     
@@ -105,14 +105,14 @@ def create_model(num_classes, pretrained=True, device='cuda'):
         device: Device to load model on
         
     Returns:
-        ChangiAeroVisionModel: Initialized model
+        CNN_ChangiAeroVisionModel: Initialized model
     """
-    model = ChangiAeroVisionModel(num_classes=num_classes, pretrained=pretrained)
+    model = CNN_ChangiAeroVisionModel(num_classes=num_classes, pretrained=pretrained)
     model = model.to(device)
     return model
 
 
 if __name__ == '__main__':
     # Test model creation
-    model = create_model(num_classes=8, pretrained=True, device='cpu')
+    model = CNN_create_model(num_classes=8, pretrained=True, device='cpu')
     model.print_model_info(num_classes=8)

@@ -35,11 +35,11 @@ def check_dependencies():
             missing_packages.append(package)
     
     if missing_packages:
-        print(f"\n⚠️  Missing packages: {', '.join(missing_packages)}")
+        print(f"\nMissing packages: {', '.join(missing_packages)}")
         print(f"   Run: pip install -r requirements.txt")
         return False
     else:
-        print("\n✓ All dependencies installed")
+        print("\nAll dependencies installed")
         return True
 
 
@@ -65,54 +65,47 @@ def configure_paths():
     print("\n" + "="*80)
     print("DATASET CONFIGURATION")
     print("="*80)
-    print("\nThe FGVC-Aircraft dataset is required for training.")
-    print("Please specify the path to your dataset.\n")
+    print("\nPlease specify the path to your organized dataset.\n")
     
     print("Expected structure:")
-    print("  your_path/fgvc-aircraft-2013b/data/")
-    print("    ├── images/")
-    print("    ├── images_variant_train.txt")
-    print("    ├── images_variant_val.txt")
-    print("    └── images_variant_test.txt\n")
+    print("  your_path\\aircraft_dataset\\")
+    print("    ├── train\\")
+    print("    │   ├── B737\\")
+    print("    │   ├── A320\\")
+    print("    │   └── ... (other classes)")
+    print("    ├── val\\")
+    print("    │   └── ...")
+    print("    └── test\\")
+    print("        └── ...\\n")
     
-    # Get FGVC root path
-    default_path = '/content/drive/MyDrive/Colab Notebooks/aircraft_dataset/fgvc-aircraft-2013b/data'
+    # Get organized dataset path
+    default_path = r'C:\Users\PC\Downloads\aircraft_dataset'
     print(f"Default path: {default_path}")
-    fgvc_root = input("Enter FGVC dataset path (or press Enter for default): ").strip()
-    
-    if not fgvc_root:
-        fgvc_root = default_path
-    
-    # Get organized dataset output path
-    default_output = '/content/drive/MyDrive/Colab Notebooks/aircraft_dataset'
-    print(f"\nDefault organized dataset output: {default_output}")
-    data_root = input("Enter organized dataset output path (or press Enter for default): ").strip()
+    print("\nYour dataset should already contain train/, val/, test/ subfolders")
+    data_root = input("Enter dataset path (or press Enter for default): ").strip()
     
     if not data_root:
-        data_root = default_output
+        data_root = default_path
     
-    # Update config.py
-    config_path = os.path.join('src', 'config.py')
+    # Update CNN_config.py
+    config_path = os.path.join('src', 'CNN_config.py')
     
     try:
         with open(config_path, 'r') as f:
             config_content = f.read()
         
-        # Replace paths
-        config_content = config_content.replace(
-            "FGVC_ROOT = '/content/drive/MyDrive/Colab Notebooks/aircraft_dataset/fgvc-aircraft-2013b/data'",
-            f"FGVC_ROOT = '{fgvc_root}'"
-        )
-        config_content = config_content.replace(
-            "DATA_ROOT = '/content/drive/MyDrive/Colab Notebooks/aircraft_dataset'",
-            f"DATA_ROOT = '{data_root}'"
+        # Replace DATA_ROOT path (use raw string for Windows paths)
+        import re
+        config_content = re.sub(
+            r"DATA_ROOT = r?['\"].*?['\"]",
+            f"DATA_ROOT = r'{data_root}'",
+            config_content
         )
         
         with open(config_path, 'w') as f:
             f.write(config_content)
         
         print(f"\n✓ Configuration updated in {config_path}")
-        print(f"  FGVC_ROOT = {fgvc_root}")
         print(f"  DATA_ROOT = {data_root}")
         
         return True
@@ -167,18 +160,15 @@ def print_next_steps():
     print("\nNext Steps:")
     print("\n1. Install dependencies (if not already done):")
     print("   pip install -r requirements.txt")
-    print("\n2. Organize the FGVC dataset:")
-    print("   python -m src.data.dataset_organizer")
-    print("\n3. Run the complete pipeline:")
+    print("\n2. Run the complete pipeline:")
     print("   python main.py")
     print("\nOR run individual steps:")
-    print("   python train.py --organize-dataset")
-    print("   python evaluate.py --visualize")
-    print("   python inference.py path/to/image.jpg")
+    print("   python CNN_train.py")
+    print("   python CNN_evaluate.py --visualize")
+    print("   python CNN_inference.py path\\to\\image.jpg")
     print("\n" + "="*80)
     print("\nFor detailed documentation, see:")
     print("  - README.md (full documentation)")
-    print("  - QUICK_REFERENCE.md (quick reference guide)")
     print("="*80)
 
 

@@ -12,9 +12,9 @@ import torch
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from src import CNN_config as config
-from src.models import ChangiAeroVisionModel
+from src.models import CNN_ChangiAeroVisionModel
 from src.data import get_train_transform, get_val_transform, organize_fgvc_dataset
-from src.training import train_two_phase
+from src.training import CNN_train_two_phase
 from src.utils import setup_environment, create_dataloaders
 
 
@@ -48,12 +48,12 @@ def main(args):
     print("\n" + "="*80)
     print("CREATING MODEL")
     print("="*80)
-    model = ChangiAeroVisionModel(num_classes=config.NUM_CLASSES, pretrained=True)
+    model = CNN_ChangiAeroVisionModel(num_classes=config.NUM_CLASSES, pretrained=True)
     model = model.to(device)
     model.print_model_info(config.NUM_CLASSES)
     
     # Two-phase training
-    results = train_two_phase(model, train_loader, val_loader, config, device)
+    results = CNN_train_two_phase(model, train_loader, val_loader, config, device)
     
     print("\n" + "="*80)
     print("TRAINING COMPLETE!")

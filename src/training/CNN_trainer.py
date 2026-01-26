@@ -121,9 +121,9 @@ def validate(model, dataloader, criterion, device, phase_name="Validation"):
     return epoch_loss, epoch_acc, np.array(all_preds), np.array(all_labels), np.array(all_probs)
 
 
-def train_two_phase(model, train_loader, val_loader, config, device):
+def CNN_train_two_phase(model, train_loader, val_loader, config, device):
     """
-    Two-phase training strategy
+    Two-phase training strategy for CNN
     Phase 1: Train classifier head only (frozen backbone)
     Phase 2: Fine-tune entire network
     

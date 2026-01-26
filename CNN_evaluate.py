@@ -12,7 +12,7 @@ import torch
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from src import CNN_config as config
-from src.models import ChangiAeroVisionModel
+from src.models import CNN_ChangiAeroVisionModel
 from src.data import get_val_transform
 from src.training import validate
 from src.evaluation import (
@@ -50,7 +50,7 @@ def main(args):
     print("\n" + "="*80)
     print("LOADING MODEL")
     print("="*80)
-    model = ChangiAeroVisionModel(num_classes=config.NUM_CLASSES, pretrained=False)
+    model = CNN_ChangiAeroVisionModel(num_classes=config.NUM_CLASSES, pretrained=False)
     model = model.to(device)
     
     # Load best model from phase 2

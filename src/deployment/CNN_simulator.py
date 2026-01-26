@@ -22,10 +22,10 @@ def denormalize_image(tensor, mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.2
     return torch.clamp(tensor, 0, 1)
 
 
-def simulate_changi_deployment(model, image, val_transform, num_angles=3, 
+def CNN_simulate_changi_deployment(model, image, val_transform, num_angles=3, 
                                conf_threshold=0.85, device='cuda'):
     """
-    Simulate real-world deployment with multi-angle verification
+    Simulate real-world CNN deployment with multi-angle verification
     Following the pseudocode from the deployment protocol
     
     Args:
@@ -154,7 +154,7 @@ def test_deployment_simulation(model, test_loader, val_transform, idx_to_class,
         true_label = idx_to_class[test_labels[idx].item()]
 
         # Simulate deployment
-        result = simulate_changi_deployment(model, image, val_transform, num_angles=3,
+        result = CNN_simulate_changi_deployment(model, image, val_transform, num_angles=3,
                                            conf_threshold=conf_threshold, device=device)
 
         print(f"\n{'='*80}")
@@ -204,9 +204,9 @@ def test_deployment_simulation(model, test_loader, val_transform, idx_to_class,
     print(f"{'='*80}")
 
 
-def benchmark_inference_time(model, device, img_size=224, num_iterations=100):
+def CNN_benchmark_inference_time(model, device, img_size=224, num_iterations=100):
     """
-    Benchmark inference time
+    Benchmark CNN inference time
     
     Args:
         model: Trained model

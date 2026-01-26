@@ -144,14 +144,17 @@ First, organize the FGVC-Aircraft dataset into ImageFolder structure:
 python -m src.data.dataset_organizer
 ```
 
-Expected FGVC dataset structure:
+Expected dataset structure:
 ```
-/content/drive/MyDrive/Colab Notebooks/aircraft_dataset/
-└── fgvc-aircraft-2013b/data/
-    ├── images/
-    ├── images_variant_train.txt
-    ├── images_variant_val.txt
-    └── images_variant_test.txt
+C:\Users\PC\Downloads\aircraft_dataset\
+├── train/
+│   ├── B737/
+│   ├── A320/
+│   └── ... (other classes)
+├── val/
+│   └── ...
+└── test/
+    └── ...
 ```
 
 ### 2. Train Model
@@ -441,9 +444,9 @@ cm, cm_norm = plot_confusion_matrix(
 
 **1. Dataset not found**
 ```
-FileNotFoundError: Dataset not found at /content/drive/MyDrive/...
+FileNotFoundError: Dataset not found at C:\Users\PC\Downloads\aircraft_dataset...
 ```
-**Solution**: Update `FGVC_ROOT` in `src/config.py` to point to your FGVC dataset location.
+**Solution**: Update `DATA_ROOT` in `src\CNN_config.py` to point to your dataset location.
 
 **2. CUDA out of memory**
 ```

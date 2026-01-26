@@ -10,9 +10,8 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from src import CNN_config as config
-from src.models import ChangiAeroVisionModel
-from src.data import get_train_transform, get_val_transform, organize_fgvc_dataset
-from src.training import train_two_phase
+from src.models import CNN_ChangiAeroVisionModel
+from src.training import CNN_train_two_phase
 from src.evaluation import (
     evaluate_model, 
     calculate_confidence_stats,
@@ -20,10 +19,11 @@ from src.evaluation import (
     plot_training_history,
     plot_business_impact
 )
-from src.deployment import benchmark_inference_time
+from src.deployment import CNN_benchmark_inference_time
 from src.utils import setup_environment, create_dataloaders, save_model_checkpoint
 from src.training import validate
 import torch
+from torchvision import transforms
 
 
 def main():
@@ -34,24 +34,30 @@ def main():
     print("="*80)
     
     # Step 1: Setup
-    print("\n[1/6] Setting up environment...")
+    print("\n[1/5] Setting up environment...")
     device = setup_environment(seed=config.SEED)
     config.print_config()
     
-    # Step 2: Organize dataset
-    print("\n[2/6] Organizing FGVC dataset...")
-    try:
-        organize_fgvc_dataset()
-    except FileNotFoundError as e:
-        print(f"\n⚠️  WARNING: FGVC dataset not found")
-        print(f"   Please update FGVC_ROOT in src/config.py")
-        print(f"   Current path: {config.FGVC_ROOT}")
-        return
+    # Step 2: Create data transforms
+    print("\n[2/5] Creating data transforms...")
+    train_transform = transforms.Compose([
+        transforms.Resize(256),
+        transforms.RandomCrop(config.IMG_SIZE),
+        transforms.RandomHorizontalFlip(),
+        transforms.ColorJitter(brightness=0.2, contrast=0.2),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=config.IMAGENET_MEAN, std=config.IMAGENET_STD)
+    ])
+    
+    val_transform = transforms.Compose([
+        transforms.Resize(256),
+        transforms.CenterCrop(config.IMG_SIZE),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=config.IMAGENET_MEAN, std=config.IMAGENET_STD)
+    ])
     
     # Step 3: Create data loaders
-    print("\n[3/6] Creating data loaders...")
-    train_transform = get_train_transform()
-    val_transform = get_val_transform()
+    print("\n[3/5] Creating data loaders...")
     
     train_loader, val_loader, test_loader, train_dataset = create_dataloaders(
         config.TRAIN_DIR, config.VAL_DIR, config.TEST_DIR,
@@ -64,15 +70,15 @@ def main():
     class_names = [idx_to_class[i] for i in range(len(idx_to_class))]
     
     # Step 4: Train model
-    print("\n[4/6] Training model (two-phase)...")
-    model = ChangiAeroVisionModel(num_classes=config.NUM_CLASSES, pretrained=True)
+    print("\n[4/5] Training model (two-phase)...")
+    model = CNN_ChangiAeroVisionModel(num_classes=config.NUM_CLASSES, pretrained=True)
     model = model.to(device)
     model.print_model_info(config.NUM_CLASSES)
     
-    results = train_two_phase(model, train_loader, val_loader, config, device)
+    results = CNN_train_two_phase(model, train_loader, val_loader, config, device)
     
     # Step 5: Evaluate
-    print("\n[5/6] Evaluating on test set...")
+    print("\n[5/5] Evaluating on test set...")
     model.load_state_dict(torch.load(f'{config.MODELS_DIR}/best_model_phase2.pth'))
     
     test_loss, test_acc, test_preds, test_labels, test_probs = validate(
@@ -102,22 +108,22 @@ def main():
     
     # Step 6: Benchmark inference
     print("\n[6/6] Benchmarking inference time...")
-    inference_stats = benchmark_inference_time(model, device)
+    inference_stats = CNN_benchmark_inference_time(model, device)
     
     # Final summary
     print("\n" + "="*80)
     print("CHANGI AEROVISION - FINAL SUMMARY")
     print("="*80)
-    print(f"\n✅ Training Complete")
+    print(f"\nTraining Complete")
     print(f"   - Phase 1 Best Accuracy: {results['best_val_acc_phase1']:.2f}%")
     print(f"   - Phase 2 Best Accuracy: {results['best_val_acc_phase2']:.2f}%")
     
-    print(f"\n✅ Evaluation Complete")
+    print(f"\nEvaluation Complete")
     print(f"   - Test Accuracy: {test_acc:.2f}%")
     print(f"   - Avg Confidence: {eval_results['avg_confidence']:.3f}")
     print(f"   - High Confidence Rate: {100*eval_results['high_confidence_count']/len(test_probs):.1f}%")
     
-    print(f"\n✅ Performance Benchmarking Complete")
+    print(f"\nPerformance Benchmarking Complete")
     print(f"   - Avg Inference Time: {inference_stats['avg_inference_time']:.2f}ms")
     
     # Operational readiness
@@ -125,11 +131,11 @@ def main():
     if test_acc >= 85 and high_conf_rate >= 0.80:
         print(f"\n🎉 PRODUCTION READY - Meets all operational requirements!")
     elif test_acc >= 76.5:
-        print(f"\n⚠️  LIMITED DEPLOYMENT - Suitable for training scenarios")
+        print(f"\nLIMITED DEPLOYMENT - Suitable for training scenarios")
     else:
-        print(f"\n❌ NOT SUITABLE - Additional training required")
+        print(f"\nNOT SUITABLE - Additional training required")
     
-    print(f"\n📁 Outputs saved to:")
+    print(f"\nOutputs saved to:")
     print(f"   - Models: {config.MODELS_DIR}/")
     print(f"   - Plots: {config.PLOTS_DIR}/")
     
