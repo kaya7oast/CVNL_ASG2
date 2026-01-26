@@ -498,3 +498,32 @@ For operational deployment inquiries: aerovision@changiairport.com
 
 **Last Updated**: January 2026  
 **Version**: 1.0.0
+
+
+
+
+
+
+# RNN Sentiment Analysis (LSTM)
+
+This project implements a sentiment classification model using an LSTM-based
+Recurrent Neural Network (RNN) in PyTorch. The model classifies aviation-related
+passenger feedback into Negative, Neutral, and Positive sentiments.
+
+## Features
+- Text preprocessing and tokenization
+- Padding and fixed-length sequences
+- LSTM-based sentiment classifier
+- Iterative model improvement with loss curves
+- Evaluation using accuracy, precision, recall, F1-score, and confusion matrix
+
+## Tech Stack
+- Python
+- PyTorch
+- Pandas, NumPy
+- Scikit-learn
+
+## How to Run
+1. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
