@@ -8,13 +8,13 @@ import sys
 import argparse
 import torch
 from PIL import Image
+from torchvision import transforms
 
 # Add src to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from src import CNN_config as config
 from src.models import CNN_ChangiAeroVisionModel
-from src.data import get_val_transform
 
 
 def predict_single_image(model, image_path, transform, idx_to_class, device):
@@ -52,64 +52,89 @@ def predict_single_image(model, image_path, transform, idx_to_class, device):
     }
 
 
-def main(args):
-    """Main inference function"""
+def main():
+    """Main inference function with interactive menu"""
     
     # Setup device
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f"Using device: {device}")
     
-    # Load model
+    # Load model once
     print("\nLoading model...")
     model = CNN_ChangiAeroVisionModel(num_classes=config.NUM_CLASSES, pretrained=False)
     model = model.to(device)
     
-    model_path = args.model_path or f'{config.MODELS_DIR}/best_model_phase2.pth'
+    model_path = f'{config.MODELS_DIR}/best_model_phase2.pth'
     model.load_state_dict(torch.load(model_path, map_location=device))
     print(f"✓ Model loaded from: {model_path}")
     
-    # Create class mapping (simplified for standalone use)
-    # In production, this should be loaded from checkpoint metadata
+    # Create class mapping
     idx_to_class = {i: cls for i, cls in enumerate(sorted(config.AIRCRAFT_CLASSES[:config.NUM_CLASSES]))}
     
-    # Get transform
-    transform = get_val_transform()
+    # Create validation transform
+    transform = transforms.Compose([
+        transforms.Resize(256),
+        transforms.CenterCrop(config.IMG_SIZE),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=config.IMAGENET_MEAN, std=config.IMAGENET_STD)
+    ])
     
-    # Make prediction
-    print(f"\nProcessing image: {args.image}")
-    result = predict_single_image(model, args.image, transform, idx_to_class, device)
-    
-    # Display results
-    print("\n" + "="*60)
-    print("PREDICTION RESULTS")
-    print("="*60)
-    print(f"Predicted Class: {result['class']}")
-    print(f"Confidence: {result['confidence']:.2%}")
-    print(f"\nAll Class Probabilities:")
-    for cls, prob in sorted(result['all_probs'].items(), key=lambda x: x[1], reverse=True):
-        print(f"  {cls}: {prob:.2%}")
-    
-    # Operational decision
-    if result['confidence'] >= config.CONFIDENCE_THRESHOLD:
-        print(f"\n✓ HIGH CONFIDENCE - Auto-assignment approved")
-        print(f"  Action: Update ground system with {result['class']}")
-    else:
-        print(f"\n⚠️  LOW CONFIDENCE - Manual verification required")
-        print(f"  Action: Flag for ground staff verification")
-    
-    print("="*60)
+    # Interactive loop
+    while True:
+        print("\n" + "="*60)
+        print("CHANGI AEROVISION - AIRCRAFT CLASSIFICATION")
+        print("="*60)
+        print("1. Predict aircraft class")
+        print("2. Exit")
+        
+        choice = input("\nEnter your choice (1 or 2): ").strip()
+        
+        if choice == '1':
+            # Get image path from user
+            image_path = input("\nEnter the path to the aircraft image: ").strip()
+            
+            # Remove quotes if user added them
+            image_path = image_path.strip('"').strip("'")
+            
+            # Check if file exists
+            if not os.path.exists(image_path):
+                print(f"\n❌ Error: Image not found at: {image_path}")
+                print("Please check the path and try again.")
+                continue
+            
+            try:
+                # Make prediction
+                print(f"\nProcessing image: {image_path}")
+                result = predict_single_image(model, image_path, transform, idx_to_class, device)
+                
+                # Display results
+                print("\n")
+                print("PREDICTION RESULTS")
+                print(f"\nPredicted Class: {result['class']}")
+                print(f"Confidence: {result['confidence']:.2%}")
+                print(f"\nAll Class Probabilities:")
+                for cls, prob in sorted(result['all_probs'].items(), key=lambda x: x[1], reverse=True):
+                    print(f"  {cls}: {prob:.2%}")
+                
+                # Operational decision
+                if result['confidence'] >= config.CONFIDENCE_THRESHOLD:
+                    print(f"\n✓ HIGH CONFIDENCE - Auto-assignment approved")
+                    print(f"  Action: Update ground system with {result['class']}")
+                else:
+                    print(f"\n⚠️  LOW CONFIDENCE - Manual verification required")
+                    print(f"  Action: Flag for ground staff verification")
+                
+            except Exception as e:
+                print(f"\n❌ Error processing image: {e}")
+                print("Please try another image.")
+        
+        elif choice == '2':
+            print("\n👋 Exiting Changi AeroVision. Goodbye!")
+            break
+        
+        else:
+            print("\n❌ Invalid choice. Please enter 1 or 2.")
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Run inference on aircraft image')
-    parser.add_argument('image', type=str, help='Path to aircraft image')
-    parser.add_argument('--model-path', type=str, default=None,
-                       help='Path to model checkpoint')
-    
-    args = parser.parse_args()
-    
-    if not os.path.exists(args.image):
-        print(f"Error: Image not found: {args.image}")
-        sys.exit(1)
-    
-    main(args)
+    main()

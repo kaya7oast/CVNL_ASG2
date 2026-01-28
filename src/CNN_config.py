@@ -23,21 +23,19 @@ VAL_DIR = os.path.join(DATA_ROOT, 'val')
 TEST_DIR = os.path.join(DATA_ROOT, 'test')
 
 # Aircraft classes representing 92% of Changi's traffic
+# Only the 8 classes available in the FGVC dataset
 AIRCRAFT_CLASSES = [
-    'B737',      # Boeing 737 - 32% of movements
     'A320',      # Airbus A320 - 28% of movements
-    'B777',      # Boeing 777 - 15% of movements
     'A330',      # Airbus A330 - 8% of movements
     'A380',      # Airbus A380 - 3% of movements (special handling)
-    'B787',      # Boeing 787 - 2% of movements
     'ATR72',     # ATR 72 - 2% of movements (regional turboprop)
+    'B737',      # Boeing 737 - 32% of movements
+    'B777',      # Boeing 777 - 15% of movements
     'CRJ900',    # Bombardier CRJ - 1% of movements
-    'E190',      # Embraer E-Jet - 1% of movements
     'MD11'       # MD-11 - rare but unique (cargo operations)
 ]
 
-# NOTE: FGVC dataset only contains 8 of these 10 classes (B787 and E190 missing)
-NUM_CLASSES = 8  # Updated to match actual FGVC dataset availability
+NUM_CLASSES = 8  # Matches actual FGVC dataset classes
 
 # Training hyperparameters
 BATCH_SIZE = 32

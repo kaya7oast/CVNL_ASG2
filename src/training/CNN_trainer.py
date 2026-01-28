@@ -121,7 +121,8 @@ def validate(model, dataloader, criterion, device, phase_name="Validation"):
     return epoch_loss, epoch_acc, np.array(all_preds), np.array(all_labels), np.array(all_probs)
 
 
-def CNN_train_two_phase(model, train_loader, val_loader, config, device):
+def CNN_train_two_phase(model, train_loader, val_loader, config, device, 
+                        use_focal_loss=False, focal_loss_weights=None):
     """
     Two-phase training strategy for CNN
     Phase 1: Train classifier head only (frozen backbone)
@@ -133,11 +134,20 @@ def CNN_train_two_phase(model, train_loader, val_loader, config, device):
         val_loader: Validation data loader
         config: Configuration object with hyperparameters
         device: Device to train on
+        use_focal_loss: Whether to use Focal Loss (default: False)
+        focal_loss_weights: Class weights for Focal Loss (optional)
         
     Returns:
         dict: Training history and best model information
     """
-    criterion = nn.CrossEntropyLoss()
+    # Import FocalLoss if needed
+    if use_focal_loss:
+        from src.training.CNN_focal_loss import FocalLoss
+        criterion = FocalLoss(alpha=focal_loss_weights, gamma=2.0)
+        print("\n\u2713 Using Focal Loss with class weights for MD-11 improvement")
+    else:
+        criterion = nn.CrossEntropyLoss()
+        print("\n\u2713 Using standard Cross Entropy Loss")
     
     # ========== PHASE 1: Train Classifier Head Only ==========
     print("="*80)
